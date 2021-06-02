@@ -3,7 +3,68 @@ import 'isomorphic-fetch';
 import MovieReviews from './MovieReviews'
 
 const NYT_API_KEY = 'dGpQ5OmGP2SgfvZimlpCUoF4iOag9qzZ';
-const URL = 'https://api.nytimes.com/svc/movies/v2/reviews/search.json?'
-            + `api-key=${NYT_API_KEY}`;
+// const URL = 'https://api.nytimes.com/svc/movies/v2/reviews/search.json?'
+            // + `api-key=${NYT_API_KEY}`;
 
+const SEARCH_URL='https://api.nytimes.com/svc/movies/v2/reviews/search.json?' 
+  +`api-key=${NYT_API_KEY}&query=`;
+
+// const SEARCH_URL = 'https://api.nytimes.com/svc/movies/v2/reviews/search.json?query=&lt;search-term>'          
+//                     + `api-key=${NYT_API_KEY}`
+//                     + `&query=`
 // Code SearchableMovieReviewsContainer Here
+
+
+export default class SearchableMovieReviewsContainer extends Component {
+    
+    state = {
+        searchTerm: '',
+        reviews: []
+    }
+
+    handleChange = (e) => {
+       console.log(e.target.value)
+       this.setState({
+           searchTerm: e.target.value
+       }) 
+    }
+
+    handleSubmit =(e) => {
+        e.preventDefault()
+        // console.log("submitted")
+
+        fetch(SEARCH_URL + this.state.searchTerm)
+        .then(resp => resp.json())
+        .then(data =>{
+            const reviews = data.results ? data.results : []
+            this.setState({
+                reviews: reviews,
+                searchTerm: ''
+            })
+        })
+    }
+    
+    render() {
+        return (
+            <div className="searchable-movie-reviews">
+            <form onSubmit={this.handleSubmit}>
+            <label htmlFor="search-input">Search Movie Reviews</label>
+                <input
+                id="search-input"
+                style={{ width: 300}}
+                name= "title"
+                value={this.state.searchTerm}
+                onChange ={this.handleChange}
+                >
+                </input>
+                <button type="submit" >Submit</button>
+            </form>
+                {typeof this.state.reviews === 'object' && this.state.reviews.length > 0 && <h2>Movie Review By Search:</h2>}
+                <MovieReviews reviews={this.state.reviews}/>
+            </div>
+        )
+    }
+}
+
+
+
